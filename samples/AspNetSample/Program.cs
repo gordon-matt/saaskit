@@ -1,21 +1,45 @@
-﻿using System.IO;
-using Microsoft.AspNetCore.Hosting;
+﻿using AspNetSample;
 
-namespace AspNetSample
-{
-    public class Program
-	{
-		public static void Main(string[] args)
-		{
-			var host = new WebHostBuilder()
-				.UseKestrel()
-				.UseContentRoot(Directory.GetCurrentDirectory())
-				.UseUrls("http://localhost:60000", "http://localhost:60001", "http://localhost:60002", "http://localhost:60003")
-				.UseIISIntegration()
-				.UseStartup<Startup>()
-				.Build();
+var host = new WebHostBuilder()
+    .UseKestrel()
+    .UseContentRoot(Directory.GetCurrentDirectory())
+    .UseUrls("http://localhost:5100", "http://localhost:5101", "http://localhost:5102")
+    .UseIISIntegration()
+    .ConfigureServices(services =>
+    {
+        services.AddMultitenancy<AppTenant, CachingAppTenantResolver>();
+    })
+    .ConfigureLogging(logging =>
+    {
+        //logging.ClearProviders();
+        logging.AddConsole();
+    })
+    .Configure(app =>
+    {
+        app.Map(
+            new PathString("/onboarding"),
+            branch => branch.Run(async ctx =>
+            {
+                await ctx.Response.WriteAsync("Onboarding");
+            })
+        );
 
-			host.Run();
-		}
-	}
-}
+        app.UseMultitenancy<AppTenant>();
+
+        app.Use(async (ctx, next) =>
+        {
+            if (ctx.GetTenant<AppTenant>().Name == "Default")
+            {
+                ctx.Response.Redirect("/onboarding");
+            }
+            else
+            {
+                await next();
+            }
+        });
+
+        app.UseMiddleware<LogTenantMiddleware>();
+    })
+    .Build();
+
+host.Run();

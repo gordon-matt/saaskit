@@ -1,6 +1,6 @@
-﻿using SaasKit.Multitenancy;
+﻿using System;
+using SaasKit.Multitenancy;
 using SaasKit.Multitenancy.StructureMap;
-using System;
 
 namespace StructureMap
 {

@@ -2,7 +2,7 @@
 
 namespace Microsoft.AspNetCore.Http
 {
-	/// <summary>
+    /// <summary>
     /// Multitenant extensions for <see cref="HttpContext"/>.
     /// </summary>
     public static class MultitenancyHttpContextExtensions
@@ -21,13 +21,7 @@ namespace Microsoft.AspNetCore.Http
         {
             Ensure.Argument.NotNull(context, nameof(context));
 
-            object tenantContext;
-            if (context.Items.TryGetValue(TenantContextKey, out tenantContext))
-            {
-                return tenantContext as TenantContext<TTenant>;
-            }
-
-            return null;
+            return context.Items.TryGetValue(TenantContextKey, out object tenantContext) ? tenantContext as TenantContext<TTenant> : null;
         }
 
         public static TTenant GetTenant<TTenant>(this HttpContext context)
@@ -36,12 +30,7 @@ namespace Microsoft.AspNetCore.Http
 
             var tenantContext = GetTenantContext<TTenant>(context);
 
-            if (tenantContext != null)
-            {
-                return tenantContext.Tenant;
-            }
-
-            return default(TTenant);
+            return tenantContext != null ? tenantContext.Tenant : default;
         }
     }
 }

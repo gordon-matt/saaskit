@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
-using Xunit;
 
 namespace SaasKit.Multitenancy.Tests
 {
@@ -11,7 +9,7 @@ namespace SaasKit.Multitenancy.Tests
         {
             HttpContext httpContext = new DefaultHttpContext();
 
-            var tenantContext = new TenantContext<TestTenant>(new TestTenant());
+            using var tenantContext = new TenantContext<TestTenant>(new TestTenant());
             httpContext.SetTenantContext(tenantContext);
 
             Assert.Same(tenantContext, httpContext.GetTenantContext<TestTenant>());
@@ -28,7 +26,7 @@ namespace SaasKit.Multitenancy.Tests
             Assert.Same(tenant, httpContext.GetTenant<TestTenant>());
         }
 
-        class TestTenant
+        private class TestTenant
         {
             public string Id { get; set; }
         }

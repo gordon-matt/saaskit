@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 namespace SaasKit.Multitenancy.Internal
 {
@@ -16,8 +16,8 @@ namespace SaasKit.Multitenancy.Internal
             = new ConcurrentDictionary<TTenant, Lazy<RequestDelegate>>();
 
         public TenantPipelineMiddleware(
-            RequestDelegate next, 
-            IApplicationBuilder rootApp, 
+            RequestDelegate next,
+            IApplicationBuilder rootApp,
             Action<TenantPipelineBuilderContext<TTenant>, IApplicationBuilder> configuration)
         {
             Ensure.Argument.NotNull(next, nameof(next));
@@ -38,7 +38,7 @@ namespace SaasKit.Multitenancy.Internal
             if (tenantContext != null)
             {
                 var tenantPipeline = pipelines.GetOrAdd(
-                    tenantContext.Tenant, 
+                    tenantContext.Tenant,
                     new Lazy<RequestDelegate>(() => BuildTenantPipeline(tenantContext)));
 
                 await tenantPipeline.Value(context);

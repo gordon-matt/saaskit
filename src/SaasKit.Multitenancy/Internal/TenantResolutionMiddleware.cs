@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace SaasKit.Multitenancy.Internal
 {
-	public class TenantResolutionMiddleware<TTenant>
+    public class TenantResolutionMiddleware<TTenant>
     {
         private readonly RequestDelegate next;
         private readonly ILogger log;

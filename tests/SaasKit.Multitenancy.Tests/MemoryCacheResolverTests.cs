@@ -2,12 +2,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace SaasKit.Multitenancy.Tests
 {
@@ -27,12 +21,11 @@ namespace SaasKit.Multitenancy.Tests
             var harness = new TestHarness();
             var context = CreateContext("/apple");
 
-            var tenantContext = await harness.Resolver.ResolveAsync(context);
+            using var tenantContext = await harness.Resolver.ResolveAsync(context);
 
             Assert.NotNull(tenantContext);
             Assert.Equal("fruit", tenantContext.Tenant.Id);
         }
-
 
         [Fact]
         public async Task Can_retrieve_tenant_context_from_cache()
@@ -40,11 +33,10 @@ namespace SaasKit.Multitenancy.Tests
             var harness = new TestHarness();
             var context = CreateContext("/apple");
 
-            var tenantContext = await harness.Resolver.ResolveAsync(context);
+            using var tenantContext = await harness.Resolver.ResolveAsync(context);
 
-            TenantContext<TestTenant> cachedTenant;
-
-            Assert.True(harness.Cache.TryGetValue("/apple", out cachedTenant));
+            Assert.True(harness.Cache.TryGetValue("/apple", out
+            TenantContext<TestTenant> cachedTenant));
 
             Assert.Equal(tenantContext.Tenant.Id, cachedTenant.Tenant.Id);
         }
@@ -55,11 +47,10 @@ namespace SaasKit.Multitenancy.Tests
             var harness = new TestHarness();
             var context = CreateContext("/apple");
 
-            var tenantContext = await harness.Resolver.ResolveAsync(context);
+            using var tenantContext = await harness.Resolver.ResolveAsync(context);
 
-            TenantContext<TestTenant> cachedTenant;
-
-            Assert.True(harness.Cache.TryGetValue("/pear", out cachedTenant));
+            Assert.True(harness.Cache.TryGetValue("/pear", out
+            TenantContext<TestTenant> cachedTenant));
 
             Assert.Equal(tenantContext.Tenant.Id, cachedTenant.Tenant.Id);
         }
@@ -70,22 +61,21 @@ namespace SaasKit.Multitenancy.Tests
             var harness = new TestHarness(cacheExpirationInSeconds: 1);
             var context = CreateContext("/apple");
 
-            var tenantContext = await harness.Resolver.ResolveAsync(context);
+            using var tenantContext = await harness.Resolver.ResolveAsync(context);
 
-            TenantContext<TestTenant> cachedTenant = null;
+            Thread.Sleep(1000);
 
-			Thread.Sleep(1000);
+            // force MemoryCache to examine itself cache for pending evictions
+            harness.Cache.Get("/foobar");
 
-			// force MemoryCache to examine itself cache for pending evictions
-			harness.Cache.Get("/foobar");
+            // and give it a moment to works its magic
+            Thread.Sleep(100);
 
-			// and give it a moment to works its magic
-			Thread.Sleep(100);
-
-			// should also expire tenant context by default
-			Assert.False(harness.Cache.TryGetValue("/apple", out cachedTenant), "Apple Exists");
-			Assert.True(tenantContext.Tenant.Disposed);
-			Assert.Null(cachedTenant);
+            // should also expire tenant context by default
+            Assert.False(harness.Cache.TryGetValue("/apple", out
+            TenantContext<TestTenant> cachedTenant), "Apple Exists");
+            Assert.True(tenantContext.Tenant.Disposed);
+            Assert.Null(cachedTenant);
         }
 
         [Fact]
@@ -94,36 +84,34 @@ namespace SaasKit.Multitenancy.Tests
             var harness = new TestHarness(cacheExpirationInSeconds: 10);
 
             // first request for apple
-            var tenantContext = await harness.Resolver.ResolveAsync(CreateContext("/apple"));
+            using var tenantContext = await harness.Resolver.ResolveAsync(CreateContext("/apple"));
 
             // cache should have all 3 entries
             Assert.NotNull(harness.Cache.Get("/apple"));
             Assert.NotNull(harness.Cache.Get("/pear"));
             Assert.NotNull(harness.Cache.Get("/grape"));
 
-            TenantContext<TestTenant> cachedTenant;
-
             // expire apple
             harness.Cache.Remove("/apple");
 
-			Thread.Sleep(500);
+            Thread.Sleep(500);
 
-			// look it up again so it registers
-			harness.Cache.TryGetValue("/apple", out cachedTenant);
+            // look it up again so it registers
+            harness.Cache.TryGetValue("/apple", out
+            TenantContext<TestTenant> cachedTenant);
 
-			Thread.Sleep(500);
+            Thread.Sleep(500);
 
-			// pear is expired - because apple is
-			Assert.False(harness.Cache.TryGetValue("/pear", out cachedTenant), "Pear Exists");
+            // pear is expired - because apple is
+            Assert.False(harness.Cache.TryGetValue("/pear", out cachedTenant), "Pear Exists");
 
-			// should also expire tenant context by default
-			Assert.True(tenantContext.Tenant.Disposed);
+            // should also expire tenant context by default
+            Assert.True(tenantContext.Tenant.Disposed);
         }
 
         [Fact]
         public async Task Can_evict_single_cache_entry_of_tenant_context()
         {
-            TenantContext<TestTenant> cachedTenant;
             var harness = new TestHarness(cacheExpirationInSeconds: 2, evictAllOnExpiry: false);
             var context = CreateContext("/apple");
 
@@ -140,48 +128,47 @@ namespace SaasKit.Multitenancy.Tests
             Thread.Sleep(1000);
 
             // apple is expired
-            Assert.False(harness.Cache.TryGetValue("/apple", out cachedTenant), "Apple Exists");
+            Assert.False(harness.Cache.TryGetValue("/apple", out TenantContext<TestTenant> cachedTenant), "Apple Exists");
 
             // pear is not expired
             Assert.True(harness.Cache.TryGetValue("/pear", out cachedTenant), "Pear Does Not Exist");
-		}
+        }
 
-		[Fact]
-		public async Task Can_dispose_on_eviction()
-		{
-			var harness = new TestHarness(cacheExpirationInSeconds: 1, disposeOnEviction: true);
-			var context = CreateContext("/apple");
+        [Fact]
+        public async Task Can_dispose_on_eviction()
+        {
+            var harness = new TestHarness(cacheExpirationInSeconds: 1, disposeOnEviction: true);
+            var context = CreateContext("/apple");
 
-			var tenantContext = await harness.Resolver.ResolveAsync(context);
+            using var tenantContext = await harness.Resolver.ResolveAsync(context);
 
-			Thread.Sleep(2 * 1000);
-			// access it again so that MemoryCache examines it's cache for pending evictions
-			harness.Cache.Get("/foobar");
+            Thread.Sleep(2 * 1000);
+            // access it again so that MemoryCache examines it's cache for pending evictions
+            harness.Cache.Get("/foobar");
 
-			Thread.Sleep(1 * 1000);
-			// access it again and we should see the eviction
-			Assert.True(tenantContext.Tenant.Disposed);
-		}
+            Thread.Sleep(1 * 1000);
+            // access it again and we should see the eviction
+            Assert.True(tenantContext.Tenant.Disposed);
+        }
 
-		[Fact]
-		public async Task Can_not_dispose_on_eviction()
-		{
-			var harness = new TestHarness(cacheExpirationInSeconds: 1, disposeOnEviction: false);
-			var context = CreateContext("/apple");
+        [Fact]
+        public async Task Can_not_dispose_on_eviction()
+        {
+            var harness = new TestHarness(cacheExpirationInSeconds: 1, disposeOnEviction: false);
+            var context = CreateContext("/apple");
 
-			var tenantContext = await harness.Resolver.ResolveAsync(context);
+            using var tenantContext = await harness.Resolver.ResolveAsync(context);
 
-			Thread.Sleep(1 * 1000);
-			// access it again so that MemoryCache examines it's cache for pending evictions
-			harness.Cache.Get("/foobar");
+            Thread.Sleep(1 * 1000);
+            // access it again so that MemoryCache examines it's cache for pending evictions
+            harness.Cache.Get("/foobar");
 
-			Thread.Sleep(1 * 1000);
-			// access it again and even though it's disposed, it should not be evicted
-			Assert.False(tenantContext.Tenant.Disposed);
-		}
+            Thread.Sleep(1 * 1000);
+            // access it again and even though it's disposed, it should not be evicted
+            Assert.False(tenantContext.Tenant.Disposed);
+        }
 
-
-		class TestTenant : IDisposable
+        private class TestTenant : IDisposable
         {
             public bool Disposed { get; set; }
 
@@ -189,7 +176,7 @@ namespace SaasKit.Multitenancy.Tests
 
             public List<string> Paths { get; set; }
 
-            public CancellationTokenSource Cts = new CancellationTokenSource();
+            public CancellationTokenSource Cts = new();
 
             public void Dispose()
             {
@@ -213,13 +200,13 @@ namespace SaasKit.Multitenancy.Tests
             }
         }
 
-        class TestTenantMemoryCacheResolver : MemoryCacheTenantResolver<TestTenant>
+        private class TestTenantMemoryCacheResolver : MemoryCacheTenantResolver<TestTenant>
         {
-            readonly List<TestTenant> tenants = new List<TestTenant>()
-                                           {
-                                               new TestTenant() { Id = "fruit", Paths = new List<string>() { "/apple","/pear","/grape" }},
-                                               new TestTenant() { Id = "vegetable", Paths = new List<string>() { "/lettuce","/carrot","/onion" }}
-                                           };
+            private readonly List<TestTenant> tenants =
+            [
+                new TestTenant { Id = "fruit", Paths = ["/apple","/pear","/grape"]},
+                new TestTenant { Id = "vegetable", Paths = ["/lettuce","/carrot","/onion"]}
+            ];
 
             private readonly int cacheExpirationInSeconds;
 
@@ -257,9 +244,9 @@ namespace SaasKit.Multitenancy.Tests
             }
         }
 
-        class TestHarness
+        private class TestHarness
         {
-            static ILoggerFactory loggerFactory = new LoggerFactory().AddConsole();
+            private static readonly ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
             public IMemoryCache Cache = new MemoryCache(new MemoryCacheOptions()
             {

@@ -1,6 +1,6 @@
-﻿using StructureMap;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using StructureMap;
 
 namespace SaasKit.Multitenancy.StructureMap
 {

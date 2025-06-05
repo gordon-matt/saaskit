@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace AspNetSample
+﻿namespace AspNetSample
 {
     public class AppTenant
     {

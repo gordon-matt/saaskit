@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace SaasKit.Multitenancy
 {
-	using System.Diagnostics;
-
-	/// <summary>
+    /// <summary>
     /// Helper class that will throw exceptions when conditions are not satisfied.
     /// </summary>
     [DebuggerStepThrough]
@@ -19,10 +18,7 @@ namespace SaasKit.Multitenancy
         /// <param name="condition">Condition to test/ensure</param>
         /// <param name="message">Message for the exception</param>
         /// <exception cref="System.Exception">Thrown when <paramref name="condition"/> is false</exception>
-        public static void That(bool condition, string message = "")
-        {
-            That<Exception>(condition, message);
-        }
+        public static void That(bool condition, string message = "") => That<Exception>(condition, message);
 
         /// <summary>
         /// Ensures that the given expression is true
@@ -48,10 +44,7 @@ namespace SaasKit.Multitenancy
         /// <param name="message">Message for the exception</param>
         /// <exception cref="TException">Thrown when <paramref name="condition"/> is true</exception>
         /// <remarks><see cref="TException"/> must have a constructor that takes a single string</remarks>
-        public static void Not<TException>(bool condition, string message = "") where TException : Exception
-        {
-            That<TException>(!condition, message);
-        }
+        public static void Not<TException>(bool condition, string message = "") where TException : Exception => That<TException>(!condition, message);
 
         /// <summary>
         /// Ensures given condition is false
@@ -59,10 +52,7 @@ namespace SaasKit.Multitenancy
         /// <param name="condition">Condition to test</param>
         /// <param name="message">Message for the exception</param>
         /// <exception cref="System.Exception">Thrown when <paramref name="condition"/> is true</exception>
-        public static void Not(bool condition, string message = "")
-        {
-            Not<Exception>(condition, message);
-        }
+        public static void Not(bool condition, string message = "") => Not<Exception>(condition, message);
 
         /// <summary>
         /// Ensures given object is not null
@@ -70,10 +60,7 @@ namespace SaasKit.Multitenancy
         /// <param name="value">Value of the object to test for null reference</param>
         /// <param name="message">Message for the Null Reference Exception</param>
         /// <exception cref="System.NullReferenceException">Thrown when <paramref name="value"/> is null</exception>
-        public static void NotNull(object value, string message = "")
-        {
-            That<NullReferenceException>(value != null, message);
-        }
+        public static void NotNull(object value, string message = "") => That<NullReferenceException>(value != null, message);
 
         /// <summary>
         /// Ensures given string is not null or empty
@@ -81,10 +68,7 @@ namespace SaasKit.Multitenancy
         /// <param name="value">String value to compare</param>
         /// <param name="message">Message of the exception if value is null or empty</param>
         /// <exception cref="System.Exception">string value is null or empty</exception>
-        public static void NotNullOrEmpty(string value, string message = "String cannot be null or empty")
-        {
-            That(!string.IsNullOrEmpty(value), message);
-        }
+        public static void NotNullOrEmpty(string value, string message = "String cannot be null or empty") => That(!string.IsNullOrEmpty(value), message);
 
         /// <summary>
         /// Ensures given objects are equal
@@ -95,10 +79,7 @@ namespace SaasKit.Multitenancy
         /// <param name="message">Message of the exception when values equal</param>
         /// <exception cref="System.Exception">Exception is thrown when <paramref cref="left"/> not equal to <paramref cref="right"/></exception>
         /// <remarks>Null values will cause an exception to be thrown</remarks>
-        public static void Equal<T>(T left, T right, string message = "Values must be equal")
-        {
-            That(left != null && right != null && left.Equals(right), message);
-        }
+        public static void Equal<T>(T left, T right, string message = "Values must be equal") => That(left != null && right != null && left.Equals(right), message);
 
         /// <summary>
         /// Ensures given objects are not equal
@@ -109,10 +90,7 @@ namespace SaasKit.Multitenancy
         /// <param name="message">Message of the exception when values equal</param>
         /// <exception cref="System.Exception">Thrown when <paramref cref="left"/> equal to <paramref cref="right"/></exception>
         /// <remarks>Null values will cause an exception to be thrown</remarks>
-        public static void NotEqual<T>(T left, T right, string message = "Values must not be equal")
-        {
-            That(left != null && right != null && !left.Equals(right), message);
-        }
+        public static void NotEqual<T>(T left, T right, string message = "Values must not be equal") => That(left != null && right != null && !left.Equals(right), message);
 
         /// <summary>
         /// Ensures given collection contains a value that satisfied a predicate
@@ -124,10 +102,7 @@ namespace SaasKit.Multitenancy
         /// <exception cref="System.Exception">
         ///     Thrown if collection is null, empty or doesn't contain a value that satisfies <paramref cref="predicate"/>
         /// </exception>
-        public static void Contains<T>(IEnumerable<T> collection, Func<T, bool> predicate, string message = "")
-        {
-            That(collection != null && collection.Any(predicate), message);
-        }
+        public static void Contains<T>(IEnumerable<T> collection, Func<T, bool> predicate, string message = "") => That(collection != null && collection.Any(predicate), message);
 
         /// <summary>
         /// Ensures ALL items in the given collection satisfy a predicate
@@ -139,10 +114,7 @@ namespace SaasKit.Multitenancy
         /// <exception cref="System.Exception">
         ///     Thrown if collection is null, empty or not all values satisfies <paramref cref="predicate"/>
         /// </exception>
-        public static void Items<T>(IEnumerable<T> collection, Func<T, bool> predicate, string message = "")
-        {
-            That(collection != null && !collection.Any(x => !predicate(x)), message);
-        }
+        public static void Items<T>(IEnumerable<T> collection, Func<T, bool> predicate, string message = "") => That(collection != null && !collection.Any(x => !predicate(x)), message);
 
         /// <summary>
         /// Argument-specific ensure methods
@@ -157,10 +129,7 @@ namespace SaasKit.Multitenancy
             /// <exception cref="System.ArgumentException">
             ///     Thrown if <paramref cref="condition"/> is false
             /// </exception>
-            public static void Is(bool condition, string message = "")
-            {
-                That<ArgumentException>(condition, message);
-            }
+            public static void Is(bool condition, string message = "") => That<ArgumentException>(condition, message);
 
             /// <summary>
             /// Ensures given condition is false
@@ -170,10 +139,7 @@ namespace SaasKit.Multitenancy
             /// <exception cref="System.ArgumentException">
             ///     Thrown if <paramref cref="condition"/> is true
             /// </exception>
-            public static void IsNot(bool condition, string message = "")
-            {
-                Is(!condition, message);
-            }
+            public static void IsNot(bool condition, string message = "") => Is(!condition, message);
 
             /// <summary>
             /// Ensures given value is not null
@@ -183,10 +149,7 @@ namespace SaasKit.Multitenancy
             /// <exception cref="System.ArgumentNullException">
             ///     Thrown if <paramref cref="value" /> is null
             /// </exception>
-            public static void NotNull(object value, string paramName = "")
-            {
-                That<ArgumentNullException>(value != null, paramName);
-            }
+            public static void NotNull(object value, string paramName = "") => That<ArgumentNullException>(value != null, paramName);
 
             /// <summary>
             /// Ensures the given string value is not null or empty

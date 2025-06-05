@@ -10,13 +10,7 @@ namespace SaasKit.Multitenancy.StructureMap.Internal
         {
             Ensure.Argument.NotNull(tenantContext, nameof(tenantContext));
 
-            object tenantContainer;
-            if (tenantContext.Properties.TryGetValue(TenantContainerKey, out tenantContainer))
-            {
-                return tenantContainer as IContainer;
-            }
-
-            return null;
+            return tenantContext.Properties.TryGetValue(TenantContainerKey, out object tenantContainer) ? tenantContainer as IContainer : null;
         }
 
         public static void SetTenantContainer<TTenant>(this TenantContext<TTenant> tenantContext, IContainer tenantContainer)

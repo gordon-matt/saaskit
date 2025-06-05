@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace SaasKit.Multitenancy.Internal
 {
@@ -32,7 +32,7 @@ namespace SaasKit.Multitenancy.Internal
 
             if (tenantContext != null)
             {
-                var primaryHostname = primaryHostnameAccessor(tenantContext.Tenant);
+                string primaryHostname = primaryHostnameAccessor(tenantContext.Tenant);
 
                 if (!string.IsNullOrWhiteSpace(primaryHostname))
                 {
@@ -47,10 +47,13 @@ namespace SaasKit.Multitenancy.Internal
             // otherwise continue processing
             await next(context);
         }
+
         private void Redirect(HttpContext context, string primaryHostname)
         {
-            var builder = new UriBuilder(context.Request.GetEncodedUrl());
-            builder.Host = primaryHostname;
+            var builder = new UriBuilder(context.Request.GetEncodedUrl())
+            {
+                Host = primaryHostname
+            };
 
             context.Response.Redirect(builder.Uri.AbsoluteUri);
             context.Response.StatusCode = permanentRedirect ? StatusCodes.Status301MovedPermanently : StatusCodes.Status302Found;

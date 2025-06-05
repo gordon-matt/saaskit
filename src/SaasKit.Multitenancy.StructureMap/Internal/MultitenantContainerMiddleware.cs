@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using StructureMap;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using StructureMap;
 
 namespace SaasKit.Multitenancy.StructureMap.Internal
 {
@@ -35,7 +35,7 @@ namespace SaasKit.Multitenancy.StructureMap.Internal
         }
 
         private async Task<IContainer> GetTenantContainerAsync(
-            TenantContext<TTenant> tenantContext, 
+            TenantContext<TTenant> tenantContext,
             Lazy<ITenantContainerBuilder<TTenant>> builder)
         {
             var tenantContainer = tenantContext.GetTenantContainer();

@@ -37,6 +37,7 @@ namespace SaasKit.Multitenancy.Internal
             // otherwise continue processing
             await next(context);
         }
+
         private void Redirect(HttpContext context, string redirectLocation)
         {
             context.Response.Redirect(redirectLocation);
