@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
+﻿namespace AspNetStructureMapSample;
 
-namespace AspNetStructureMapSample
+public class AppTenant
 {
-	public class AppTenant
-    {
-        public string Name { get; set; }
-        public IEnumerable<string> Hostnames { get; set; }
-    }
+    public string Name { get; set; }
+    public IEnumerable<string> Hostnames { get; set; }
 }

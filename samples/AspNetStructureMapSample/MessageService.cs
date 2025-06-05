@@ -1,43 +1,31 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿namespace AspNetStructureMapSample;
 
-namespace AspNetStructureMapSample
+public interface IMessageService
 {
-    public interface IMessageService
+    Guid Id { get; }
+
+    string Format(string message);
+}
+
+public class MessageService : IMessageService, IDisposable
+{
+    private readonly ILogger<MessageService> log;
+
+    public MessageService(ILogger<MessageService> log)
     {
-        Guid Id { get; }
-        string Format(string message);
+        this.log = log;
     }
 
-    public class MessageService : IMessageService, IDisposable
-    {
-        ILogger<MessageService> log;
+    public Guid Id { get; } = Guid.NewGuid();
 
-        public MessageService(ILogger<MessageService> log)
-        {
-            this.log = log;
-        }
+    public void Dispose() => log.LogInformation("Disposing MessageSerivce:{id}", Id);
 
-        public Guid Id { get; } = Guid.NewGuid();
+    public string Format(string message) => $"{Id}: {message}";
+}
 
-        public void Dispose()
-        {
-            log.LogInformation("Disposing MessageSerivce:{id}", Id);
-        }
+public class OtherMessageService : IMessageService
+{
+    public Guid Id { get; } = Guid.NewGuid();
 
-        public string Format(string message)
-        {
-            return $"{Id}: {message}";
-        }
-    }
-
-    public class OtherMessageService : IMessageService
-    {
-        public Guid Id { get; } = Guid.NewGuid();
-
-        public string Format(string message)
-        {
-            return "Other";
-        }
-    }
+    public string Format(string message) => "Other";
 }

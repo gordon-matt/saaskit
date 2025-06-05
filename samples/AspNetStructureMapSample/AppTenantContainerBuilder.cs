@@ -1,34 +1,32 @@
 ﻿using SaasKit.Multitenancy.StructureMap;
 using StructureMap;
-using System.Threading.Tasks;
 
-namespace AspNetStructureMapSample
+namespace AspNetStructureMapSample;
+
+public class AppTenantContainerBuilder : ITenantContainerBuilder<AppTenant>
 {
-    public class AppTenantContainerBuilder : ITenantContainerBuilder<AppTenant>
+    private readonly IContainer container;
+
+    public AppTenantContainerBuilder(IContainer container)
     {
-        private IContainer container;
+        this.container = container;
+    }
 
-        public AppTenantContainerBuilder(IContainer container)
+    public Task<IContainer> BuildAsync(AppTenant tenant)
+    {
+        var tenantContainer = container.CreateChildContainer();
+        tenantContainer.Configure(config =>
         {
-            this.container = container;
-        }
-
-        public Task<IContainer> BuildAsync(AppTenant tenant)
-        {
-            var tenantContainer = container.CreateChildContainer();
-            tenantContainer.Configure(config =>
+            if (tenant.Name == "Tenant 1")
             {
-                if (tenant.Name == "Tenant 1")
-                {
-                    config.ForSingletonOf<IMessageService>().Use<OtherMessageService>();
-                }
-                else
-                {
-                    config.ForSingletonOf<IMessageService>().Use<MessageService>();
-                }
-            });
+                config.ForSingletonOf<IMessageService>().Use<OtherMessageService>();
+            }
+            else
+            {
+                config.ForSingletonOf<IMessageService>().Use<MessageService>();
+            }
+        });
 
-            return Task.FromResult(tenantContainer);
-        }
+        return Task.FromResult(tenantContainer);
     }
 }
