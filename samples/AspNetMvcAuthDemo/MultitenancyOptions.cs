@@ -1,9 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace AspNetMvcAuthSample
+namespace AspNetMvcAuthSample;
+
+public class MultitenancyOptions
 {
-    public class MultitenancyOptions
-    {
-        public Collection<AppTenant> Tenants { get; set; }
-    }
+    public Collection<AppTenant> Tenants { get; set; }
 }

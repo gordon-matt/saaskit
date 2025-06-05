@@ -1,39 +1,33 @@
-using Microsoft.AspNetCore.Http.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
-namespace AspNetMvcAuthSample.Controllers
+namespace AspNetMvcAuthSample.Controllers;
+
+public class AccountController : Controller
 {
-    public class AccountController : Controller
+    private readonly ILogger<AccountController> logger;
+
+    public AccountController(ILogger<AccountController> logger)
     {
-        ILogger<AccountController> logger;
+        this.logger = logger;
+    }
 
-        public AccountController(ILogger<AccountController> logger)
+    public IActionResult LogIn() => View();
+
+    public IActionResult Google()
+    {
+        var props = new AuthenticationProperties
         {
-            this.logger = logger;
-        }
+            RedirectUri = "/home/about"
+        };
 
-        public IActionResult LogIn()
-        {
-            return View();
-        }
+        return new ChallengeResult("Google", props);
+    }
 
-        public IActionResult Google()
-        {
-            var props = new AuthenticationProperties
-            {
-                RedirectUri  = "/home/about"
-            };
-            
-            return new ChallengeResult("Google", props);
-        }
+    public async Task<IActionResult> LogOut()
+    {
+        await HttpContext.SignOutAsync("Cookies");
 
-        public async Task<IActionResult> LogOut()
-        {
-            await HttpContext.Authentication.SignOutAsync("Cookies");
-
-            return RedirectToAction("index", "home");
-        }
+        return RedirectToAction("index", "home");
     }
 }
