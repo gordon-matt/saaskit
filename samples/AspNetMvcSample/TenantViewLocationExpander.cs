@@ -1,9 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Razor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc.Razor;
 
 namespace AspNetMvcSample
 {
@@ -13,17 +8,16 @@ namespace AspNetMvcSample
 
         public void PopulateValues(ViewLocationExpanderContext context)
         {
-            context.Values[THEME_KEY] 
+            context.Values[THEME_KEY]
                 = context.ActionContext.HttpContext.GetTenant<AppTenant>()?.Theme;
 
-            context.Values[TENANT_KEY] 
+            context.Values[TENANT_KEY]
                 = context.ActionContext.HttpContext.GetTenant<AppTenant>()?.Name.Replace(" ", "-");
         }
 
         public IEnumerable<string> ExpandViewLocations(ViewLocationExpanderContext context, IEnumerable<string> viewLocations)
         {
-            string theme = null;
-            if (context.Values.TryGetValue(THEME_KEY, out theme))
+            if (context.Values.TryGetValue(THEME_KEY, out string theme))
             {
                 IEnumerable<string> themeLocations = new[]
                 {
@@ -31,8 +25,7 @@ namespace AspNetMvcSample
                     $"/Themes/{theme}/Shared/{{0}}.cshtml"
                 };
 
-                string tenant;
-                if (context.Values.TryGetValue(TENANT_KEY, out tenant))
+                if (context.Values.TryGetValue(TENANT_KEY, out string tenant))
                 {
                     themeLocations = ExpandTenantLocations(tenant, themeLocations);
                 }
@@ -40,13 +33,12 @@ namespace AspNetMvcSample
                 viewLocations = themeLocations.Concat(viewLocations);
             }
 
-
             return viewLocations;
         }
 
         private IEnumerable<string> ExpandTenantLocations(string tenant, IEnumerable<string> defaultLocations)
         {
-            foreach (var location in defaultLocations)
+            foreach (string location in defaultLocations)
             {
                 yield return location.Replace("{0}", $"{{0}}_{tenant}");
                 yield return location;

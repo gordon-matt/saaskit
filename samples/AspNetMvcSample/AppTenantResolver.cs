@@ -1,18 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using SaasKit.Multitenancy;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AspNetMvcSample
 {
-	using Microsoft.Extensions.Options;
-
-	public class CachingAppTenantResolver : MemoryCacheTenantResolver<AppTenant>
+    public class CachingAppTenantResolver : MemoryCacheTenantResolver<AppTenant>
     {
         private readonly IEnumerable<AppTenant> tenants;
 
@@ -36,7 +28,7 @@ namespace AspNetMvcSample
         {
             TenantContext<AppTenant> tenantContext = null;
 
-            var tenant = tenants.FirstOrDefault(t => 
+            var tenant = tenants.FirstOrDefault(t =>
                 t.Hostnames.Any(h => h.Equals(context.Request.Host.Value.ToLower())));
 
             if (tenant != null)

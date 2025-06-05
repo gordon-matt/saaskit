@@ -1,20 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Hosting;
-using System.IO;
 
 namespace AspNetMvcSample.Models
 {
-
-	// https://ef.readthedocs.org/en/latest/
+    // https://ef.readthedocs.org/en/latest/
 
     public class SqliteApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        private readonly IHostingEnvironment env;
+        private readonly IHostEnvironment env;
         private readonly AppTenant tenant;
 
-        public SqliteApplicationDbContext(IHostingEnvironment env, AppTenant tenant)
+        public SqliteApplicationDbContext(IHostEnvironment env, AppTenant tenant)
         {
             this.env = env;
             this.tenant = tenant;
@@ -23,8 +19,8 @@ namespace AspNetMvcSample.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var tenantDbName = tenant.Name.Replace(" ", "-").ToLowerInvariant();
-            var connectionString = $"FileName={tenantDbName}.db";
+            string tenantDbName = tenant.Name.Replace(" ", "-").ToLowerInvariant();
+            string connectionString = $"FileName={tenantDbName}.db";
             optionsBuilder.UseSqlite(connectionString);
 
             base.OnConfiguring(optionsBuilder);

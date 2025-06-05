@@ -1,21 +1,61 @@
-﻿using System.IO;
-using Microsoft.AspNetCore.Hosting;
+using AspNetMvcSample;
+using AspNetMvcSample.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.EntityFrameworkCore;
 
-namespace AspNetMvcSample
+var builder = WebApplication.CreateBuilder(args);
+
+// Configuration setup
+var configBuilder = new ConfigurationBuilder()
+    .SetBasePath(builder.Environment.ContentRootPath)
+    .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
+
+configBuilder.AddEnvironmentVariables();
+var configuration = configBuilder.Build();
+
+// Services configuration
+builder.Services.AddMultitenancy<AppTenant, CachingAppTenantResolver>();
+builder.Services.AddEntityFrameworkSqlite().AddDbContext<SqliteApplicationDbContext>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<SqliteApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddOptions();
+builder.Services.AddControllersWithViews();
+builder.Services.Configure<RazorViewEngineOptions>(options =>
 {
-    public class Program
-	{
-		public static void Main(string[] args)
-		{
-			var host = new WebHostBuilder()
-				.UseKestrel()
-				.UseContentRoot(Directory.GetCurrentDirectory())
-				.UseUrls("http://localhost:60000", "http://localhost:60001", "http://localhost:60002", "http://localhost:60003")
-				.UseIISIntegration()
-				.UseStartup<Startup>()
-				.Build();
+    options.ViewLocationExpanders.Add(new TenantViewLocationExpander());
+});
+builder.Services.Configure<MultitenancyOptions>(configuration.GetSection("Multitenancy"));
 
-			host.Run();
-		}
-	}
+var app = builder.Build();
+
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    //app.UseDatabaseErrorPage();
 }
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    try
+    {
+        using var serviceScope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        serviceScope.ServiceProvider.GetService<SqlServerApplicationDbContext>()?.Database.Migrate();
+    }
+    catch { }
+}
+
+app.UseStaticFiles();
+app.UseMultitenancy<AppTenant>();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();

@@ -1,45 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using AspNetMvcSample.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using SaasKit.Multitenancy;
 
-namespace AspNetMvcSample.Controllers
+namespace AspNetMvcSample.Controllers;
+
+public class HomeController : Controller
 {
+    private readonly AppTenant tenant;
+    private readonly ILogger<HomeController> _logger;
 
-	public class HomeController : Controller
+    public HomeController(ITenant<AppTenant> tenant, ILogger<HomeController> logger)
     {
-        private readonly AppTenant tenant;
+        this.tenant = tenant?.Value;
+        _logger = logger;
+    }
 
-        public HomeController(ITenant<AppTenant> tenant)
-        {
-            this.tenant = tenant?.Value;
-        }
+    public IActionResult Index()
+    {
+        return View();
+    }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+    public IActionResult About()
+    {
+        ViewData["Message"] = $"Your application description page for {tenant?.Name ?? "Default"}";
 
-        public IActionResult About()
-        {
-            ViewData["Message"] = $"Your application description page for {tenant?.Name ?? "Default"}";
+        return View();
+    }
 
-            return View();
-        }
+    public IActionResult Privacy()
+    {
+        return View();
+    }
 
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
-
-        public IActionResult Error()
-        {
-            return View();
-        }
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

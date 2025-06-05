@@ -3,10 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AspNetMvcSample.Models
 {
-	using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-	using Microsoft.EntityFrameworkCore;
-
-	public class SqlServerApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class SqlServerApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         private readonly AppTenant tenant;
 
